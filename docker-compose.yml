@@ -1,0 +1,47 @@
+cache:
+  image: ubuntu-debootstrap:14.04
+  volumes:
+    - /cache
+  command: echo
+es:
+  image: dockerfile/elasticsearch
+  expose:
+    - "9200"
+    - "9300"
+db:
+  image: dockerfile/mongodb
+  expose:
+    - "27017"
+  command: mongod --smallfiles
+peopleApi:
+  image: agco/buildstep
+  volumes_from:
+      - cache
+  command: npm start
+  volumes:
+    - ./peopleApi:/localrepo/
+    - ./env:/env
+  environment:
+    USE_LOCAL_REPO: true
+    PORT: 9900
+  ports:
+    - "9900"
+  links:
+    - db
+    - es
+postsApi:
+  image: agco/buildstep
+  volumes_from:
+      - cache
+  command: npm start
+  volumes:
+    - ./postsApi:/localrepo/
+    - ./env:/env
+  environment:
+    USE_LOCAL_REPO: true
+    PORT: 9800
+  ports:
+    - "9800"
+  links:
+    - db
+    - es
